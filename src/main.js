@@ -21,7 +21,7 @@ import './permission' // permission control
 import * as filters from './filters' // global filters
 
 if (process.env.NODE_ENV === 'development') {
-  require('./mock') // simulation data
+  // require('./mock') // simulation data
 }
 
 Vue.use(Element, {

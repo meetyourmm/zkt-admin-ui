@@ -16,8 +16,13 @@ for (let i = 0; i < count; i++) {
 export default {
   getList: () => {
     return {
-      total: List.length,
-      items: List
+      status: 200,
+      message: 'Success',
+      success: true,
+      data: {
+        total: List.length,
+        items: List
+      }
     }
   }
 }

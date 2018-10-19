@@ -9,7 +9,20 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/auth': {
+        target: 'http://localhost:8080',
+        pathRewrite: {
+          '^/auth': '/auth'
+        },
+      },
+      '/api':{
+        target: 'http://localhost:8080',
+        pathRewrite: {
+          '^/api': '/api'
+        },
+      }
+    },
 
     // Various Dev Server settings
 

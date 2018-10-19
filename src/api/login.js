@@ -1,27 +1,29 @@
-import request from '@/utils/request'
+import request from '@/authority/request'
+import qs from 'qs'
 
-export function loginByUsername(username, password) {
+export function loginByUsername(clientId, userName, password) {
   const data = {
-    username,
+    clientId,
+    userName,
     password
   }
   return request({
-    url: '/login/login',
+    url: '/auth/login',
     method: 'post',
-    data
+    data: qs.stringify(data)
   })
 }
 
 export function logout() {
   return request({
-    url: '/login/logout',
+    url: '/auth/logout',
     method: 'post'
   })
 }
 
 export function getUserInfo(token) {
   return request({
-    url: '/user/info',
+    url: '/api/user/info',
     method: 'get',
     params: { token }
   })

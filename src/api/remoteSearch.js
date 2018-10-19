@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/authority/request'
 
 export function userSearch(name) {
   return request({
