@@ -14,7 +14,7 @@ service.interceptors.request.use(
   config => {
     // Do something before request is sent
     if (store.getters.token) {
-      // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
+      // 让每个请求携带token-- ['Authorization']为自定义key 请根据实际情况自行修改
       config.headers['Authorization'] = getToken()
     }
     return config
@@ -46,23 +46,16 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
-      return Promise.reject('error')
+      // return Promise.reject('error')
     } else {
       const res = response.data
-      if (res.status === 40101) { // token过期或者异常
+      if (res.status === 40101 || res.status === 40001 || res.status === 500) { // token过期或者异常 用户异常 其他异常
         Message({
           message: res.message,
           type: 'error',
           duration: 5 * 1000
         })
-        return Promise.reject('error')
-      } else if (res.status === 40001) { // 用户名或密码错误
-        Message({
-          message: res.message,
-          type: 'error',
-          duration: 5 * 1000
-        })
-        return Promise.reject('error')
+        // return Promise.reject('error')
       } else {
         return res
       }
@@ -76,9 +69,9 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log('访问接口异常：' + error) // for debug
     Message({
-      message: error.message,
+      message: '访问接口异常：' + error.message,
       type: 'error',
       duration: 5 * 1000
     })

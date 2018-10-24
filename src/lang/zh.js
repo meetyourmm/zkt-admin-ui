@@ -1,5 +1,7 @@
 export default {
   route: {
+    sysAdmin: '系统管理',
+    userManager: '用户管理',
     dashboard: '首页',
     introduction: '简述',
     documentation: '文档',

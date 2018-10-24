@@ -1,5 +1,7 @@
 export default {
   route: {
+    sysAdmin: 'System',
+    userManager: 'UserManage',
     dashboard: 'Dashboard',
     introduction: 'Introduction',
     documentation: 'Documentation',

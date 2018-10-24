@@ -1,37 +1,34 @@
 import { loginByUsername, logout, getUserInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/authority/auth'
-
+import { constantRouterMap, asyncRouterMap } from '@/router'
+import menuFilter from '@/utils/permission'
 const clientId = '098f6bcd4621d373cade4e832627b4f6'
 const user = {
   state: {
-    user: '',
     status: '',
     code: '',
     token: getToken(),
     name: '',
     avatar: '',
+    role: '',
     introduction: '',
-    roles: [],
+    menus: undefined,
     setting: {
       articlePlatform: []
-    }
+    },
+    routers: constantRouterMap,
+    addRouters: []
   },
 
   mutations: {
+    SET_STATUS: (state, status) => {
+      state.status = status
+    },
     SET_CODE: (state, code) => {
       state.code = code
     },
     SET_TOKEN: (state, token) => {
       state.token = token
-    },
-    SET_INTRODUCTION: (state, introduction) => {
-      state.introduction = introduction
-    },
-    SET_SETTING: (state, setting) => {
-      state.setting = setting
-    },
-    SET_STATUS: (state, status) => {
-      state.status = status
     },
     SET_NAME: (state, name) => {
       state.name = name
@@ -39,17 +36,38 @@ const user = {
     SET_AVATAR: (state, avatar) => {
       state.avatar = avatar
     },
+    SET_INTRODUCTION: (state, introduction) => {
+      state.introduction = introduction
+    },
     SET_ROLES: (state, roles) => {
       state.roles = roles
+    },
+    SET_MENUS: (state, menus) => {
+      state.menus = menus
+    },
+    SET_SETTING: (state, setting) => {
+      state.setting = setting
+    },
+    SET_ROLE: (state, role) => {
+      state.role = role
+    },
+    SET_ROUTERS: (state, routers) => {
+      let asynRoters
+      if (state.role === 'admin') {
+        asynRoters = asyncRouterMap
+      } else {
+        asynRoters = routers
+      }
+      state.addRouters = asynRoters
+      state.routers = constantRouterMap.concat(asynRoters)
     }
   },
 
   actions: {
     // 用户名登录
     LoginByUsername({ commit }, userInfo) {
-      const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
-        loginByUsername(clientId, username, userInfo.password).then(response => {
+        loginByUsername(clientId, userInfo.username.trim(), userInfo.password).then(response => {
           const token = response.data
           setToken(token)
           commit('SET_TOKEN', token)
@@ -61,23 +79,20 @@ const user = {
     },
 
     // 获取用户信息
-    GetUserInfo({ commit, state }) {
+    GetUserInfo({ commit }) {
       return new Promise((resolve, reject) => {
-        getUserInfo(state.token).then(response => {
+        getUserInfo().then(response => {
           if (!response.data) { // 由于mockjs 不支持自定义状态码只能这样hack
             reject('error')
           }
           const data = response.data
-          data.roles = ['admin']
-          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.roles)
-          } else {
-            reject('getInfo: roles must be a non-null array !')
-          }
 
-          commit('SET_NAME', data.name)
+          commit('SET_NAME', data.nickName)
           commit('SET_AVATAR', data.avatar)
           commit('SET_INTRODUCTION', data.introduction)
+          commit('SET_ROLE', data.role)
+          commit('SET_MENUS', data.menus)
+          commit('SET_ROUTERS', menuFilter(data.menus, 'menu'))
           resolve(data)
         }).catch(error => {
           reject(error)
@@ -120,24 +135,24 @@ const user = {
         removeToken()
         resolve()
       })
-    },
+    }
 
     // 动态修改权限
-    ChangeRoles({ commit, dispatch }, role) {
-      return new Promise(resolve => {
-        commit('SET_TOKEN', role)
-        setToken(role)
-        getUserInfo(role).then(response => {
-          const data = response.data
-          commit('SET_ROLES', data.roles)
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          commit('SET_INTRODUCTION', data.introduction)
-          dispatch('GenerateRoutes', data) // 动态修改权限后 重绘侧边菜单
-          resolve()
-        })
-      })
-    }
+    // ChangeRoles({ commit, dispatch }, role) {
+    //   return new Promise(resolve => {
+    //     commit('SET_TOKEN', role)
+    //     setToken(role)
+    //     getUserInfo(role).then(response => {
+    //       const data = response.data
+    //       commit('SET_ROLES', data.roles)
+    //       commit('SET_NAME', data.name)
+    //       commit('SET_AVATAR', data.avatar)
+    //       commit('SET_INTRODUCTION', data.introduction)
+    //       dispatch('GenerateRoutes', data) // 动态修改权限后 重绘侧边菜单
+    //       resolve()
+    //     })
+    //   })
+    // }
   }
 }
 
