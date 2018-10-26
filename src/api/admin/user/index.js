@@ -13,7 +13,7 @@ export function addObj(obj) {
   return request({
     url: '/api/user/addObj',
     method: 'post',
-    data: qs.stringify(obj)
+    data: obj
   })
 }
 
@@ -21,7 +21,7 @@ export function getObj(id) {
   return request({
     url: '/api/user/getObj',
     method: 'post',
-    data: id
+    data: qs.stringify(id)
   })
 }
 
@@ -29,7 +29,7 @@ export function delObj(id) {
   return request({
     url: '/api/user/delObj',
     method: 'post',
-    data: id
+    data: qs.stringify(id)
   })
 }
 
@@ -37,6 +37,13 @@ export function putObj(obj) {
   return request({
     url: '/api/user/putObj',
     method: 'post',
-    data: qs.stringify(obj)
+    data: obj
+  })
+}
+export function validateUser(userName) {
+  return request({
+    url: '/api/user/validateUser',
+    method: 'post',
+    data: qs.stringify(userName)
   })
 }

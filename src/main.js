@@ -8,6 +8,7 @@ import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
 import '@/styles/index.scss' // global css
+import vueWaves from './directive/waves' // 水波纹指令
 
 import App from './App'
 import router from './router'
@@ -28,6 +29,8 @@ Vue.use(Element, {
   size: Cookies.get('size') || 'medium', // set element-ui default size
   i18n: (key, value) => i18n.t(key, value)
 })
+
+Vue.use(vueWaves)
 
 // register global utility filters.
 Object.keys(filters).forEach(key => {

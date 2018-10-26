@@ -9,15 +9,15 @@
     <!--<el-table-column align="center" label="序号" width="65"> <template scope="scope">-->
           <!--<span>{{scope.row.id}}</span>-->
         <!--</template> </el-table-column>-->
-    <el-table-column width="110" align="center" label="账号"> <template scope="scope">
-        <span>{{scope.row.userName}}</span>
-      </template> </el-table-column>
-    <el-table-column width="110" align="center" label="昵称"> <template scope="scope">
-            <span>{{scope.row.nickName}}</span>
-          </template> </el-table-column>
     <el-table-column width="110" align="center" label="姓名"> <template scope="scope">
       <span>{{scope.row.realName}}</span>
     </template> </el-table-column>
+    <el-table-column width="110" align="center" label="账号"> <template scope="scope">
+        <span>{{scope.row.userName}}</span>
+      </template> </el-table-column>
+    <!--<el-table-column width="110" align="center" label="昵称"> <template scope="scope">-->
+            <!--<span>{{scope.row.nickName}}</span>-->
+          <!--</template> </el-table-column>-->
     <el-table-column width="110" align="center" label="性别"> <template scope="scope">
             <span>{{scope.row.gender}}</span>
           </template> </el-table-column>
@@ -28,7 +28,7 @@
       <span>{{scope.row.email}}</span>
     </template> </el-table-column>
     <el-table-column width="180" align="center" label="最后时间"> <template scope="scope">
-          <span>{{scope.row.updateTime}}</span>
+          <span>{{scope.row.updateTime | parseTime}}</span>
         </template> </el-table-column>
     <el-table-column width="200" align="center" label="最后更新人"> <template scope="scope">
             <span>{{scope.row.updateUserName}}</span>
@@ -45,23 +45,26 @@
   </div>
   <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="姓名" prop="name">
-        <el-input v-model="form.name" placeholder="请输入姓名"></el-input>
+      <el-form-item label="姓名" prop="realName">
+        <el-input v-model="form.realName" placeholder="请输入姓名"></el-input>
       </el-form-item>
-      <el-form-item label="账户" prop="username">
-        <el-input v-if="dialogStatus == 'create'" v-model="form.username" placeholder="请输入账户"></el-input>
-        <el-input v-else v-model="form.username" placeholder="请输入账户" readonly></el-input>
+      <el-form-item label="账户" prop="userName">
+        <el-input v-if="dialogStatus == 'create'" v-model="form.userName" placeholder="请输入账户"></el-input>
+        <el-input v-else v-model="form.userName" placeholder="请输入账户" readonly></el-input>
       </el-form-item>
       <el-form-item v-if="dialogStatus == 'create'" label="密码" placeholder="请输入密码" prop="password">
         <el-input type="password" v-model="form.password"></el-input>
       </el-form-item>
       <el-form-item label="性别">
-        <el-select class="filter-item" v-model="form.sex" placeholder="请选择">
+        <el-select class="filter-item" v-model="form.gender" placeholder="请选择">
           <el-option v-for="item in  sexOptions" :key="item" :label="item" :value="item"> </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="描述">
-        <el-input type="textarea" :autosize="{ minRows: 3, maxRows: 5}" placeholder="请输入内容" v-model="form.description"> </el-input>
+      <el-form-item label="手机" prop="mobile">
+        <el-input v-model="form.mobile" placeholder="请输入手机号"></el-input>
+      </el-form-item>
+      <el-form-item label="邮箱" prop="mobile">
+        <el-input v-model="form.email" placeholder="请输入邮箱"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -79,36 +82,67 @@ import {
   addObj,
   getObj,
   delObj,
-  putObj
+  putObj,
+  validateUser
 } from '@/api/admin/user/index';
 import { mapGetters } from 'vuex';
 import { getElements } from '@/utils/permission'
+import { validateMobile,validateEmail } from '@/utils/validate'
+
 export default {
   name: 'user',
   data() {
+    let validUser = (rule, userName, callback) => {
+      if(this.dialogStatus == 'update'){
+        callback()
+      }
+      //后台方法
+      validateUser({userName}).then(res => {
+        if (res.data === true) {
+          callback('用户名已存在')
+        } else {
+          callback()
+        }
+      })
+    }
+    let validMobile = (rule, value, callback) => {
+      if(!validateMobile(value)){
+        callback('手机号格式错误')
+      } else {
+        callback()
+      }
+    }
+    let validEmail = (rule, value, callback) => {
+      if(!validateEmail(value)){
+        callback('邮箱格式错误')
+      } else {
+        callback()
+      }
+    }
     return {
       form: {
-        username: undefined,
-        name: undefined,
+        userName: undefined,
+        realName: undefined,
         sex: '男',
         password: undefined,
-        description: undefined
+        mobile: undefined,
+        email: undefined
       },
       rules: {
-        name: [
+        realName: [
           {
             required: true,
-            message: '请输入用户',
+            message: '请输入用户姓名',
             trigger: 'blur'
           },
           {
-            min: 3,
+            min: 2,
             max: 20,
-            message: '长度在 3 到 20 个字符',
+            message: '长度在 2 到 20 个字符',
             trigger: 'blur'
           }
         ],
-        username: [
+        userName: [
           {
             required: true,
             message: '请输入账户',
@@ -119,18 +153,34 @@ export default {
             max: 20,
             message: '长度在 3 到 20 个字符',
             trigger: 'blur'
+          },
+          {
+            validator:validUser,
+            trigger: 'blur'
           }
         ],
         password: [
+          // {
+          //   required: true,
+          //   message: '请输入密码',
+          //   trigger: 'blur'
+          // },
           {
-            required: true,
-            message: '请输入密码',
+            min: 6,
+            max: 30,
+            message: '长度在 6 到 30 个字符',
             trigger: 'blur'
-          },
+          }
+        ],
+        mobile: [
           {
-            min: 5,
-            max: 20,
-            message: '长度在 5 到 20 个字符',
+            validator:validMobile,
+            trigger: 'blur'
+          }
+        ],
+        email: [
+          {
+            validator:validEmail,
             trigger: 'blur'
           }
         ]
@@ -146,7 +196,7 @@ export default {
       sexOptions: ['男', '女'],
       dialogFormVisible: false,
       dialogStatus: '',
-        userManager_btn_edit: false,
+      userManager_btn_edit: false,
       userManager_btn_del: false,
       userManager_btn_add: false,
       textMap: {
@@ -160,13 +210,14 @@ export default {
     this.getList();
     const elements = {}
     getElements(this.menus,elements);
-    this.userManager_btn_edit = elements['userManager:btn_edit'];
-    this.userManager_btn_del = elements['userManager:btn_del'];
-    this.userManager_btn_add = elements['userManager:btn_add'];
+    this.userManager_btn_edit = elements['userManager:btn_edit'] | this.role =='admin';
+    this.userManager_btn_del = elements['userManager:btn_del'] | this.role =='admin';
+    this.userManager_btn_add = elements['userManager:btn_add'] | this.role =='admin';
   },
   computed: {
     ...mapGetters([
-      'menus'
+      'menus',
+      'role'
     ])
   },
   methods: {
@@ -196,7 +247,7 @@ export default {
       this.dialogFormVisible = true;
     },
     handleUpdate(row) {
-      getObj(row.id)
+      getObj({"id":row.id})
         .then(response => {
           this.form = response.data;
           this.dialogFormVisible = true;
@@ -204,22 +255,22 @@ export default {
         });
     },
     handleDelete(row) {
-      this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+      this.$confirm('此操作将删除数据, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          delObj(row.id)
+          delObj({"id":row.id})
             .then(() => {
+              this.dialogFormVisible = false;
+              this.getList();
               this.$notify({
                 title: '成功',
                 message: '删除成功',
                 type: 'success',
                 duration: 2000
               });
-              const index = this.list.indexOf(row);
-              this.list.splice(index, 1);
             });
         });
     },
@@ -253,12 +304,12 @@ export default {
         if (valid) {
           this.dialogFormVisible = false;
           this.form.password = undefined;
-          putObj(this.form.id, this.form).then(() => {
+          putObj(this.form).then(() => {
             this.dialogFormVisible = false;
             this.getList();
             this.$notify({
               title: '成功',
-              message: '创建成功',
+              message: '保存成功',
               type: 'success',
               duration: 2000
             });
@@ -270,11 +321,12 @@ export default {
     },
     resetTemp() {
       this.form = {
-        username: undefined,
-        name: undefined,
+        userName: undefined,
+        realName: undefined,
         sex: '男',
         password: undefined,
-        description: undefined
+        mobile: undefined,
+        email: undefined
       };
     }
   }
