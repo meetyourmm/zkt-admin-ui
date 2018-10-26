@@ -4,7 +4,6 @@ import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css'// progress bar style
 import { getToken } from '@/authority/auth' // getToken from cookie
-import menuFilter from './utils/permission'
 
 NProgress.configure({ showSpinner: false })// NProgress Configuration
 

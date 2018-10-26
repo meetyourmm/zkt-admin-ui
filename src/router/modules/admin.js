@@ -13,16 +13,16 @@ const adminRouter = {
   redirect: 'noredirect',
   name: 'adminSys',
   meta: {
-    title: 'sysAdmin',
-    icon: 'tab'
+    title: '系统管理',
+    icon: 'tree'
   },
   children: [{
     path: '/userManager',
     component: () => import('@/views/admin/user/index'),
     name: 'userManager',
     meta: {
-      title: 'userManager',
-      icon: 'fa-user'
+      title: '用户管理',
+      icon: 'user'
     }
   },
   {
@@ -30,8 +30,8 @@ const adminRouter = {
     component: () => import('@/views/admin/menu/index'),
     name: 'menuManager',
     meta: {
-      title: 'menuManager ',
-      icon: 'category'
+      title: '菜单管理 ',
+      icon: 'list'
     }
   },
   {
@@ -39,8 +39,17 @@ const adminRouter = {
     component: () => import('@/views/admin/group/index'),
     name: 'groupManager',
     meta: {
-      title: 'groupManager',
-      icon: 'group_fill'
+      title: '角色权限管理',
+      icon: 'peoples'
+    }
+  },
+  {
+    path: '/dictManager',
+    component: () => import('@/views/admin/group/index'),
+    name: 'dictManager',
+    meta: {
+      title: '数据字典',
+      icon: 'dictionary'
     }
   },
   {
@@ -48,8 +57,8 @@ const adminRouter = {
     component: () => import('@/views/admin/apiLog/index'),
     name: 'viewlist',
     meta: {
-      title: 'logManager',
-      icon: 'fa-user'
+      title: '接口日志',
+      icon: 'log'
     }
   }
   ]

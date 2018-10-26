@@ -1,39 +1,42 @@
 import request from '@/authority/request'
+import qs from 'qs'
 
-export function page(query) {
+export function page(data) {
   return request({
-    url: '/api/admin/user/page',
-    method: 'get',
-    params: query
+    url: '/api/user/page',
+    method: 'post',
+    data: qs.stringify(data)
   })
 }
 
 export function addObj(obj) {
   return request({
-    url: '/api/admin/user',
+    url: '/api/user/addObj',
     method: 'post',
-    data: obj
+    data: qs.stringify(obj)
   })
 }
 
 export function getObj(id) {
   return request({
-    url: '/api/admin/user/' + id,
-    method: 'get'
+    url: '/api/user/getObj',
+    method: 'post',
+    data: id
   })
 }
 
 export function delObj(id) {
   return request({
-    url: '/api/admin/user/' + id,
-    method: 'delete'
+    url: '/api/user/delObj',
+    method: 'post',
+    data: id
   })
 }
 
-export function putObj(id, obj) {
+export function putObj(obj) {
   return request({
-    url: '/api/admin/user/' + id,
-    method: 'put',
-    data: obj
+    url: '/api/user/putObj',
+    method: 'post',
+    data: qs.stringify(obj)
   })
 }

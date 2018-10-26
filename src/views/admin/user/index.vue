@@ -6,28 +6,34 @@
     <el-button class="filter-item"  v-if="userManager_btn_add"  style="margin-left: 10px;" @click="handleCreate" type="primary" icon="edit">添加</el-button>
   </div>
   <el-table :key='tableKey' :data="list" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">
-    <el-table-column align="center" label="序号" width="65"> <template scope="scope">
-          <span>{{scope.row.id}}</span>
-        </template> </el-table-column>
-    <el-table-column width="200" align="center" label="姓名"> <template scope="scope">
-        <span>{{scope.row.name}}</span>
+    <!--<el-table-column align="center" label="序号" width="65"> <template scope="scope">-->
+          <!--<span>{{scope.row.id}}</span>-->
+        <!--</template> </el-table-column>-->
+    <el-table-column width="110" align="center" label="账号"> <template scope="scope">
+        <span>{{scope.row.userName}}</span>
       </template> </el-table-column>
-    <el-table-column width="110" align="center" label="账户"> <template scope="scope">
-            <span>{{scope.row.username}}</span>
+    <el-table-column width="110" align="center" label="昵称"> <template scope="scope">
+            <span>{{scope.row.nickName}}</span>
           </template> </el-table-column>
+    <el-table-column width="110" align="center" label="姓名"> <template scope="scope">
+      <span>{{scope.row.realName}}</span>
+    </template> </el-table-column>
     <el-table-column width="110" align="center" label="性别"> <template scope="scope">
-            <span>{{scope.row.sex}}</span>
+            <span>{{scope.row.gender}}</span>
           </template> </el-table-column>
-    <el-table-column width="300" align="center" label="备注"> <template scope="scope">
-            <span>{{scope.row.description}}</span>
-          </template> </el-table-column>
+    <el-table-column width="200" align="center" label="手机"> <template scope="scope">
+      <span>{{scope.row.mobile}}</span>
+    </template> </el-table-column>
+    <el-table-column width="250" align="center" label="邮箱"> <template scope="scope">
+      <span>{{scope.row.email}}</span>
+    </template> </el-table-column>
     <el-table-column width="180" align="center" label="最后时间"> <template scope="scope">
-          <span>{{scope.row.updTime}}</span>
+          <span>{{scope.row.updateTime}}</span>
         </template> </el-table-column>
     <el-table-column width="200" align="center" label="最后更新人"> <template scope="scope">
-            <span>{{scope.row.updName}}</span>
+            <span>{{scope.row.updateUserName}}</span>
           </template> </el-table-column>
-    <el-table-column align="center" label="操作" width="150"> <template scope="scope">
+    <el-table-column align="center" label="操作"> <template scope="scope">
         <el-button v-if="userManager_btn_edit" size="small" type="success" @click="handleUpdate(scope.row)">编辑
         </el-button>
         <el-button v-if="userManager_btn_del" size="small" type="danger" @click="handleDelete(scope.row)">删除
@@ -76,6 +82,7 @@ import {
   putObj
 } from '@/api/admin/user/index';
 import { mapGetters } from 'vuex';
+import { getElements } from '@/utils/permission'
 export default {
   name: 'user',
   data() {
@@ -139,7 +146,7 @@ export default {
       sexOptions: ['男', '女'],
       dialogFormVisible: false,
       dialogStatus: '',
-      userManager_btn_edit: false,
+        userManager_btn_edit: false,
       userManager_btn_del: false,
       userManager_btn_add: false,
       textMap: {
@@ -151,13 +158,15 @@ export default {
   },
   created() {
     this.getList();
-    this.userManager_btn_edit = this.elements['userManager:btn_edit'];
-    this.userManager_btn_del = this.elements['userManager:btn_del'];
-    this.userManager_btn_add = this.elements['userManager:btn_add'];
+    const elements = {}
+    getElements(this.menus,elements);
+    this.userManager_btn_edit = elements['userManager:btn_edit'];
+    this.userManager_btn_del = elements['userManager:btn_del'];
+    this.userManager_btn_add = elements['userManager:btn_add'];
   },
   computed: {
     ...mapGetters([
-      'elements'
+      'menus'
     ])
   },
   methods: {
@@ -165,7 +174,7 @@ export default {
       this.listLoading = true;
       page(this.listQuery)
         .then(response => {
-          this.list = response.data.rows;
+          this.list = response.data.list;
           this.total = response.data.total;
           this.listLoading = false;
         })
