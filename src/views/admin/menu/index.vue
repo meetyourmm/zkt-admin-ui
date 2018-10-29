@@ -29,9 +29,9 @@
   </el-col>
   <el-col :span="16" style='margin-top:15px;'>
      <el-card class="box-card">
-    <el-form :label-position="labelPosition" label-width="80px" :model="form" ref="form">
-      <el-form-item label="路径编码" prop="code">
-          <el-input v-model="form.code" :disabled="formEdit" placeholder="请输入路径编码"></el-input>
+    <el-form :label-position="labelPosition" :rules="rules" label-width="80px" :model="form" ref="form">
+      <el-form-item label="菜单编码" prop="code">
+          <el-input v-model="form.code" :disabled="formEdit" placeholder="请输入菜单编码"></el-input>
       </el-form-item>
           <el-form-item label="标题" prop="title">
           <el-input v-model="form.title" :disabled="formEdit"  placeholder="请输入标题"></el-input>
@@ -42,11 +42,14 @@
       <el-form-item label="图标" prop="icon">
           <el-input v-model="form.icon" :disabled="formEdit" placeholder="请输入图标"></el-input>
       </el-form-item>
-          <el-form-item label="资源路径" prop="href">
-          <el-input v-model="form.href" :disabled="formEdit" placeholder="请输入资源路径"></el-input>
+      <el-form-item label="路由地址" prop="path">
+        <el-input v-model="form.path" :disabled="formEdit" placeholder="请输入路由地址"></el-input>
+      </el-form-item>
+      <el-form-item label="视图路径" prop="view">
+          <el-input v-model="form.view" :disabled="formEdit" placeholder="请输入视图路径"></el-input>
       </el-form-item>
       <el-form-item label="类型" prop="type">
-         <el-select class="filter-item" v-model="form.type"  :disabled="formEdit"  placeholder="请输入资源请求类型">
+         <el-select class="filter-item" v-model="form.type"  :disabled="formEdit"  placeholder="请输入资源类型">
           <el-option v-for="item in  typeOptions" :key="item" :label="item" :value="item"> </el-option>
         </el-select>
       </el-form-item>
@@ -56,15 +59,12 @@
       <el-form-item label="描述"   prop="description">
           <el-input v-model="form.description" :disabled="formEdit" placeholder="请输入描述"></el-input>
       </el-form-item>
-       <el-form-item label="前端组件"   prop="attr1">
-          <el-input v-model="form.attr1" :disabled="formEdit" placeholder="请输入描述"></el-input>
-      </el-form-item>
        <el-form-item v-if="formStatus == 'update'">
-        <el-button type="primary" @click="update">更新</el-button>
+        <el-button type="primary" @click="update('form')">更新</el-button>
         <el-button @click="onCancel">取消</el-button>
       </el-form-item>
       <el-form-item v-if="formStatus == 'create'">
-        <el-button type="primary" @click="create">保存</el-button>
+        <el-button type="primary" @click="create('form')">保存</el-button>
         <el-button @click="onCancel">取消</el-button>
       </el-form-item>
     </el-form>
@@ -80,15 +80,29 @@
 
 <script>
 import {
-  fetchTree, getObj, addObj, delObj, putObj
+  fetchTree, getObj, addObj, delObj, putObj, validateCode
 } from '@/api/admin/menu/index';
 import { mapGetters } from 'vuex';
+import { getElements, getMenus, hasChild } from '@/utils/permission'
 export default {
   name: 'menu',
   components: {
     'menu-element': () => import('./components/element')
   },
   data() {
+    let validCode = (rule, code, callback) => {
+      if(this.formStatus == 'update'){
+        callback()
+      }
+      //后台方法
+      validateCode({code}).then(res => {
+        if (res.data === true) {
+          callback('编码已存在')
+        } else {
+          callback()
+        }
+      })
+    }
     return {
       filterText: '',
       list: null,
@@ -97,28 +111,68 @@ export default {
       formAdd: true,
       formStatus: '',
       showElement: false,
-      typeOptions: ['menu', 'dirt'],
+      // typeOptions: ['menu', 'button'],
+      typeOptions: ['menu'],
       listQuery: {
         name: undefined
       },
       treeData: [],
       defaultProps: {
         children: 'children',
-        label: 'title'
+        label: 'label'
       },
       labelPosition: 'right',
       form: {
-        code: undefined,
-        title: undefined,
-        parentId: undefined,
-        href: undefined,
-        icon: undefined,
-        orderNum: undefined,
-        description: undefined,
-        path: undefined,
-        enabled: undefined,
-        type: undefined,
-        attr1: undefined
+        code: undefined, //编码
+        title: undefined, //标题
+        parentId: undefined, //父节点
+        href: undefined, //
+        icon: undefined, //图标
+        orderNum: undefined, //排序
+        description: undefined, //描述
+        path: undefined, //菜单路由
+        view: undefined,//试图路径
+        uri: undefined,//后台请求路径
+        status: undefined, //启用禁用删除
+        type: undefined //
+      },
+      rules: {
+        code: [
+          {
+            required: true,
+            message: '请输入菜单编码',
+            trigger: 'blur'
+          },
+          {
+            min: 2,
+            max: 20,
+            message: '长度在 2 到 20 个字符',
+            trigger: 'blur'
+          },
+          {
+            validator:validCode,
+            trigger: 'blur'
+          }
+        ],
+        title: [
+          {
+            required: true,
+            message: '请输入标题名称',
+            trigger: 'blur'
+          },
+          {
+            min: 3,
+            max: 20,
+            message: '长度在 3 到 20 个字符',
+            trigger: 'blur'
+          }
+        ],
+        type: [{
+          required: true,
+          message: '请输入资源类型"',
+          trigger: 'blur'
+        }
+        ]
       },
       currentId: -1,
       menuManager_btn_add: false,
@@ -133,19 +187,22 @@ export default {
   },
   created() {
     this.getList();
-    this.menuManager_btn_add = this.elements['menuManager:btn_add'];
-    this.menuManager_btn_del = this.elements['menuManager:btn_del'];
-    this.menuManager_btn_edit = this.elements['menuManager:btn_edit'];
+    const elements = {}
+    getElements(this.menus,elements);
+    this.menuManager_btn_add = elements['menuManager:btn_add'] | this.role =='admin';
+    this.menuManager_btn_del = elements['menuManager:btn_del'] | this.role =='admin';
+    this.menuManager_btn_edit = elements['menuManager:btn_edit'] | this.role =='admin';
   },
   computed: {
     ...mapGetters([
-      'elements'
+      'menus',
+      'role'
     ])
   },
   methods: {
     getList() {
-      fetchTree(this.listQuery).then(data => {
-        this.treeData = data;
+      fetchTree(this.listQuery).then(res => {
+        this.treeData = getMenus(res.data);
       });
     },
     filterNode(value, data) {
@@ -156,12 +213,12 @@ export default {
       if (!this.formEdit) {
         this.formStatus = 'update';
       }
-      getObj(data.id).then(response => {
+      getObj({"id":data.id}).then(response => {
         this.form = response.data;
       });
       this.currentId = data.id;
       this.showElement = true;
-      this.$refs.menuElement.menuId = data.id;
+      this.$refs.menuElement.parentId = data.id;
       this.$refs.menuElement.getList();
     },
     handlerEdit() {
@@ -176,12 +233,16 @@ export default {
       this.formStatus = 'create';
     },
     handleDelete() {
-      this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+      if(hasChild(this.treeData,this.currentId)){//判断是否有子节点
+        this.$alert('请先删除所有子节点以及该节点下的按钮','提示')
+        return
+      }
+      this.$confirm('此操作将删除数据, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delObj(this.currentId).then(() => {
+        delObj({"id":this.currentId}).then(() => {
           this.getList();
           this.resetForm();
           this.onCancel();
@@ -194,27 +255,33 @@ export default {
         });
       });
     },
-    update() {
-      putObj(this.form.id, this.form).then(() => {
-        this.getList();
-        this.$notify({
-          title: '成功',
-          message: '更新成功',
-          type: 'success',
-          duration: 2000
+    update(formName) {
+      set[formName].validate(valid => {
+        putObj(this.form).then(() => {
+          this.getList();
+          this.$notify({
+            title: '成功',
+            message: '更新成功',
+            type: 'success',
+            duration: 2000
+          });
         });
-      });
+      })
     },
-    create() {
-      addObj(this.form).then(() => {
-        this.getList();
-        this.$notify({
-          title: '成功',
-          message: '创建成功',
-          type: 'success',
-          duration: 2000
-        });
-      });
+    create(formName) {
+      set[formName].validate(valid => {
+        if (valid) {
+          addObj(this.form).then(() => {
+            this.getList();
+            this.$notify({
+              title: '成功',
+              message: '创建成功',
+              type: 'success',
+              duration: 2000
+            });
+          });
+        }
+      })
     },
     onCancel() {
       this.formEdit = true;
@@ -222,15 +289,18 @@ export default {
     },
     resetForm() {
       this.form = {
-        code: undefined,
-        title: undefined,
-        parentId: this.currentId,
-        href: undefined,
-        icon: undefined,
-        orderNum: undefined,
-        description: undefined,
-        path: undefined,
-        enabled: undefined
+        code: undefined, //编码
+        title: undefined, //标题
+        parentId:  this.currentId, //父节点
+        href: undefined, //
+        icon: undefined, //图标
+        orderNum: undefined, //排序
+        description: undefined, //描述
+        path: undefined, //菜单路由
+        view: undefined,//试图路径
+        uri: undefined,//后台请求路径
+        status: undefined, //启用禁用删除
+        type: undefined //
       };
     }
   }

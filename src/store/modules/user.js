@@ -1,7 +1,7 @@
 import { loginByUsername, logout, getUserInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/authority/auth'
 import { constantRouterMap, asyncRouterMap } from '@/router'
-import { getMenus } from '@/utils/permission'
+import { getRouters } from '@/utils/permission'
 const clientId = '098f6bcd4621d373cade4e832627b4f6'
 const user = {
   state: {
@@ -92,7 +92,7 @@ const user = {
           commit('SET_INTRODUCTION', data.introduction)
           commit('SET_ROLE', data.role)
           commit('SET_MENUS', data.menus)
-          var routers = getMenus(JSON.parse(JSON.stringify(data.menus)))
+          var routers = getRouters(JSON.parse(JSON.stringify(data.menus)))
           commit('SET_ROUTERS', routers)
           resolve(data)
         }).catch(error => {

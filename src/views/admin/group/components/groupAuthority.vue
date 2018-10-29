@@ -49,9 +49,9 @@
 import {
   fetchTree
 } from '@/api/admin/menu/index';
-import {
-  page
-} from '@/api/admin/element/index';
+// import {
+//   page
+// } from '@/api/admin/element/index';
 import {
   removeElementAuthority,
   addElementAuthority,

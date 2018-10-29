@@ -10,7 +10,7 @@ Vue.use(Router)
 const adminRouter = {
   path: '/adminSys',
   component: Layout,
-  redirect: 'noredirect',
+  // redirect: 'noredirect',
   name: 'adminSys',
   meta: {
     title: '系统管理',
@@ -45,7 +45,7 @@ const adminRouter = {
   },
   {
     path: '/dictManager',
-    component: () => import('@/views/admin/group/index'),
+    component: () => import('@/views/admin/dict/index'),
     name: 'dictManager',
     meta: {
       title: '数据字典',
