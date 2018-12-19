@@ -256,6 +256,7 @@ export default {
       });
     },
     update(formName) {
+      const set = this.$refs;
       set[formName].validate(valid => {
         putObj(this.form).then(() => {
           this.getList();
@@ -269,6 +270,7 @@ export default {
       })
     },
     create(formName) {
+      const set = this.$refs;
       set[formName].validate(valid => {
         if (valid) {
           addObj(this.form).then(() => {
