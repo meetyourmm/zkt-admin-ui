@@ -1,15 +1,9 @@
 import request from '@/authority/request'
+import qs from 'qs'
 
-export function getAllGroupTypes() {
+export function fetchTree(query) {
   return request({
-    url: '/api/admin/groupType/all',
-    method: 'get'
-  })
-}
-
-export function requestTree(query) {
-  return request({
-    url: '/api/admin/group/tree',
+    url: '/api/group/tree',
     method: 'get',
     params: query
   })
@@ -17,7 +11,7 @@ export function requestTree(query) {
 
 export function addObj(obj) {
   return request({
-    url: '/api/admin/group',
+    url: '/api/group/addObj',
     method: 'post',
     data: obj
   })
@@ -25,76 +19,53 @@ export function addObj(obj) {
 
 export function getObj(id) {
   return request({
-    url: '/api/admin/group/' + id,
-    method: 'get'
-  });
+    url: '/api/group/getObj',
+    method: 'post',
+    data: qs.stringify(id)
+  })
 }
 
 export function delObj(id) {
   return request({
-    url: '/api/admin/group/' + id,
-    method: 'delete'
+    url: '/api/group/delObj',
+    method: 'post',
+    data: qs.stringify(id)
   })
 }
 
-export function putObj(id, obj) {
+export function putObj(obj) {
   return request({
-    url: '/api/admin/group/' + id,
-    method: 'put',
+    url: '/api/group/putObj',
+    method: 'post',
     data: obj
   })
 }
-
-export function getUsers(id) {
+export function validateCode(code) {
   return request({
-    url: '/api/admin/group/' + id + '/user',
-    method: 'get'
-  })
-}
-
-export function modifyUsers(id, data) {
-  return request({
-    url: '/api/admin/group/' + id + '/user',
-    method: 'put',
-    params: data
-  })
-}
-
-export function removeElementAuthority(id, data) {
-  return request({
-    url: '/api/admin/group/' + id + '/authority/element/remove',
+    url: '/api/group/validateCode',
     method: 'post',
-    params: data
-  });
+    data: qs.stringify(code)
+  })
 }
 
-export function addElementAuthority(id, data) {
+export function getGroupUsers(query) {
   return request({
-    url: '/api/admin/group/' + id + '/authority/element/add',
+    url: '/api/group/getGroupUsers',
+    method: 'get',
+    params: query
+  })
+}
+export function addGroupUsers(ids) {
+  return request({
+    url: '/api/group/addGroupUsers',
     method: 'post',
-    params: data
+    params: ids
   })
 }
-
-export function getElementAuthority(id) {
+export function delGroupUsers(ids) {
   return request({
-    url: '/api/admin/group/' + id + '/authority/element',
-    method: 'get'
-  })
-}
-
-export function modifyMenuAuthority(id, data) {
-  return request({
-    url: '/api/admin/group/' + id + '/authority/menu',
+    url: '/api/group/delGroupUsers',
     method: 'post',
-    params: data
+    params: ids
   })
 }
-
-export function getMenuAuthority(id) {
-  return request({
-    url: '/api/admin/group/' + id + '/authority/menu',
-    method: 'get'
-  })
-}
-

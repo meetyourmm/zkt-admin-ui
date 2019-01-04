@@ -35,11 +35,20 @@ const adminRouter = {
     }
   },
   {
+    path: '/departManager',
+    component: () => import('@/views/admin/depart/index'),
+    name: 'departManager',
+    meta: {
+      title: '部门管理 ',
+      icon: 'tree'
+    }
+  },
+  {
     path: '/groupManager',
     component: () => import('@/views/admin/group/index'),
     name: 'groupManager',
     meta: {
-      title: '角色权限管理',
+      title: '角色管理',
       icon: 'peoples'
     }
   },

@@ -49,7 +49,7 @@ service.interceptors.response.use(
       // return Promise.reject('error')
     } else {
       const res = response.data
-      if (res.status === 40101 || res.status === 40001 || res.status === 500) { // token过期或者异常 用户异常 其他异常
+      if (res.status === 40101 || res.status === 40001 || res.status === 40401 || res.status === 500) { // token过期或者异常 用户异常 其他异常
         Message({
           message: res.message,
           type: 'error',
