@@ -33,7 +33,7 @@ export function getObj(id) {
   return request({
     url: '/api/menu/getObj',
     method: 'post',
-    data: qs.stringify(id)
+    params: id
   })
 }
 
@@ -41,7 +41,7 @@ export function delObj(id) {
   return request({
     url: '/api/menu/delObj',
     method: 'post',
-    data: qs.stringify(id)
+    params: id
   })
 }
 
@@ -56,7 +56,7 @@ export function validateCode(code) {
   return request({
     url: '/api/menu/validateCode',
     method: 'post',
-    data: qs.stringify(code)
+    params: code
   })
 }
 

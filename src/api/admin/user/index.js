@@ -5,7 +5,7 @@ export function page(data) {
   return request({
     url: '/api/user/page',
     method: 'post',
-    data: qs.stringify(data)
+    params: data
   })
 }
 
@@ -21,7 +21,7 @@ export function getObj(id) {
   return request({
     url: '/api/user/getObj',
     method: 'post',
-    data: qs.stringify(id)
+    params: id
   })
 }
 
@@ -29,7 +29,7 @@ export function delObj(id) {
   return request({
     url: '/api/user/delObj',
     method: 'post',
-    data: qs.stringify(id)
+    params: id
   })
 }
 
@@ -44,6 +44,6 @@ export function validateUser(userName) {
   return request({
     url: '/api/user/validateUser',
     method: 'post',
-    data: qs.stringify(userName)
+    params: userName
   })
 }
