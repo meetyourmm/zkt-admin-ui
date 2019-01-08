@@ -1,116 +1,152 @@
 <template>
-<el-form label-width="80px">
-  <el-form-item label="群主|领导">
-    <el-select v-model="leaders" multiple filterable remote placeholder="请输入关键词" :remote-method="remoteLeaderMethod" :loading="loading">
-      <el-option v-for="item in lItems" :key="item.id" :label="item.name" :value="item.id"> </el-option>
-    </el-select>
-  </el-form-item>
-  <el-form-item label="组员|下属">
-    <el-select v-model="members" multiple filterable remote placeholder="请输入关键词" :remote-method="remoteMemberMethod" :loading="loading">
-      <el-option v-for="item in mItems" :key="item.id" :label="item.name" :value="item.id"> </el-option>
-    </el-select>
-  </el-form-item>
-  <el-form-item>
-    <el-button type="primary" v-if="groupManager_btn_userManager" @click="onSubmit">保存</el-button>
-  </el-form-item>
-</el-form>
+  <div class="app-container calendar-list-container">
+    <div class="filter-container">
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="姓名或账户"
+                v-model="listQuery.name"></el-input>
+      <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
+      <el-button class="filter-item" v-if="groupManager_btn_user_add" v-bind:disabled="groupId==-1" style="margin-left: 10px;" @click="handleCreate"
+                 type="primary" icon="edit">添加用户
+      </el-button>
+    </div>
+    <el-table :key='tableKey' :data="list" v-loading.body="listLoading" border fit highlight-current-row
+              style="width: 100%">
+      <!--<el-table-column align="center" label="id" width="65">-->
+      <!--<template scope="scope">-->
+      <!--<span>{{scope.row.id}}</span>-->
+      <!--</template>-->
+
+      <!--</el-table-column>-->
+      <el-table-column width="110" align="center" label="姓名"> <template scope="scope">
+        <span>{{scope.row.realName}}</span>
+      </template> </el-table-column>
+      <el-table-column width="110" align="center" label="账号"> <template scope="scope">
+        <span>{{scope.row.userName}}</span>
+      </template> </el-table-column>
+      <!--<el-table-column width="110" align="center" label="昵称"> <template scope="scope">-->
+      <!--<span>{{scope.row.nickName}}</span>-->
+      <!--</template> </el-table-column>-->
+      <el-table-column width="110" align="center" label="性别"> <template scope="scope">
+        <span>{{scope.row.gender}}</span>
+      </template> </el-table-column>
+      <el-table-column width="200" align="center" label="手机"> <template scope="scope">
+        <span>{{scope.row.mobile}}</span>
+      </template> </el-table-column>
+      <el-table-column width="250" align="center" label="邮箱"> <template scope="scope">
+        <span>{{scope.row.email}}</span>
+      </template> </el-table-column>
+      <el-table-column fixed="right" align="center" label="操作" width="150">
+        <template scope="scope">
+          <el-button v-if="groupManager_btn_user_del" size="small" type="danger" @click="handleDelete(scope.row)">删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div v-show="!listLoading" class="pagination-container">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.page" :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next, jumper" :total="total"> </el-pagination>
+    </div>
+    <group-user-select :callBackFunc="createdUsers" ref="userSelectedElement"></group-user-select>
+  </div>
 </template>
 
 <script>
-import {
-  page
-} from '@/api/admin/user/index';
-import {
-  getUsers,
-  modifyUsers
-} from '@/api/admin/group/index';
-import { mapGetters } from 'vuex';
-export default {
-  props: {
-    groupId: {
-      default: '1'
-    }
-  },
-  data() {
-    return {
-      lItems: [],
-      mItems: [],
-      leaders: [],
-      members: [],
-      list: [],
-      loading: false,
-      groupManager_btn_userManager: false
-    }
-  },
-  created() {
-    this.initUsers();
-    this.groupManager_btn_userManager = this.elements['groupManager:btn_userManager'];
-  },
-  computed: {
-    ...mapGetters([
-      'elements'
-    ])
-  },
-  methods: {
-    remoteMemberMethod(query) {
-      if (query !== '') {
-        this.loading = true;
-        this.loading = false;
-        page({
-          name: query
-        }).then(response => {
-          this.mItems = response.data.rows;
-          this.total = response.data.total;
-          this.loading = false;
-        });
-      } else {
-        this.mItems = [];
+  import {
+    getGroupUsers,
+    delGroupUsers,
+    addGroupUsers
+  } from '@/api/admin/group/index';
+  import {mapGetters} from 'vuex';
+  import {getElements} from '@/utils/permission'
+
+  export default {
+    name: 'element',
+    components: {
+      'group-user-select': () => import('./groupUserSelect'),
+    },
+    data() {
+      return {
+        list: null,
+        total: null,
+        listLoading: true,
+        listQuery: {
+          page: 1,
+          limit: 20,
+          name: undefined,
+          groupId:undefined
+        },
+        groupManager_btn_user_add: false,
+        groupManager_btn_user_del: false,
+        groupId: -1,
+        tableKey: 0
       }
     },
-    remoteLeaderMethod(query) {
-      if (query !== '') {
-        this.loading = true;
-        this.loading = false;
-        page({
-          name: query
-        }).then(response => {
-          this.lItems = response.data.rows;
+    created() {
+      // this.getList();
+      this.listLoading = false;
+      const elements = {}
+      getElements(this.menus, elements);
+      this.groupManager_btn_user_add = elements['groupManager:btn_user_add'] | this.role == 'admin'
+      this.groupManager_btn_user_del = elements['groupManager:btn_user_del'] | this.role == 'admin'
+    },
+    computed: {
+      ...mapGetters([
+        'menus',
+        'role'
+      ])
+    },
+    methods: {
+      getList() {
+        this.listLoading = true;
+        this.listQuery.groupId = this.groupId;
+        getGroupUsers(this.listQuery).then(response => {
+          this.list = response.data.list;
           this.total = response.data.total;
-          this.loading = false;
+          this.listLoading = false;
+        })
+      },
+      handleFilter() {
+        this.getList();
+      },
+      handleCreate() {
+        this.$refs.userSelectedElement.dialogFormVisible = true;
+        //this.$refs.userSelectedElement.callBackFunc = this.createdUsers;
+        this.$refs.userSelectedElement.getList();
+      },
+      createdUsers(ids){
+        addGroupUsers({"ids": ids,"groupId":this.groupId}).then(() => {
+          this.$notify({
+            title: '成功',
+            message: '添加成功',
+            type: 'success',
+            duration: 2000
+          });
+          this.getList();
         });
-      } else {
-        this.lItems = [];
-      }
-    },
-    onSubmit() {
-      const vals = {};
-      if (this.members.length > 0) vals.members = this.members.join();
-      if (this.leaders.length > 0) vals.leaders = this.leaders.join();
-      modifyUsers(this.groupId, vals).then(() => {
-        this.$emit('closeUserDialog');
-        this.$notify({
-          title: '成功',
-          message: '保存成功',
-          type: 'success',
-          duration: 2000
+      },
+      handleDelete(row) {
+        this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          delGroupUsers({"ids": row.id,"groupId":this.groupId}).then(() => {
+            this.$notify({
+              title: '成功',
+              message: '删除成功',
+              type: 'success',
+              duration: 2000
+            });
+            this.getList();
+          });
         });
-      });
-    },
-    initUsers() {
-      getUsers(this.groupId).then(response => {
-        this.lItems = response.data.leaders;
-        this.mItems = response.data.members;
-        const mems = [], leas = [];
-        for (let i = 0; i < response.data.members.length; i++) {
-          mems.push(response.data.members[i].id);
-        }
-        for (let i = 0; i < response.data.leaders.length; i++) {
-          leas.push(response.data.leaders[i].id);
-        }
-        this.members = mems;
-        this.leaders = leas;
-      });
+      },
+      handleSizeChange(val) {
+        this.listQuery.limit = val;
+        this.getList();
+      },
+      handleCurrentChange(val) {
+        this.listQuery.page = val;
+        this.getList();
+      },
     }
   }
-}
 </script>

@@ -178,7 +178,16 @@ export default {
   watch: {
     filterText(val) {
       this.$refs.menuTree.filter(val);
-    }
+    },
+    'activeName':function(val) {
+      if(this.activeName=="user"){
+        this.$refs.groupElement.groupId = this.currentId;
+        this.$refs.groupElement.getList();
+      }else if(this.activeName=="auth"){
+        this.$refs.authElement.groupId = this.currentId;
+        this.$refs.authElement.getList();
+      }
+    },
   },
   created() {
     this.getList();

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container calendar-list-container">
 
-    <el-row v-loading.body="listLoading">
+    <el-row  v-loading.body="listLoading">
       <el-col style='margin-top:15px;padding-right: 10px;'>
           <div slot="header" class="clearfix">
             <span>资源权限</span>
@@ -25,7 +25,7 @@
       </el-col>
     </el-row>
     <el-row style="padding-top: 15px">
-      <el-button class="filter-item" v-if="departManager_btn_auth_save" v-bind:disabled="groupId==-1" style="margin-left: 10px;" @click="save"
+      <el-button class="filter-item" v-if="groupManager_btn_auth_save" v-bind:disabled="groupId==-1" style="margin-left: 10px;" @click="save"
                  type="primary" icon="edit">保存
       </el-button>
     </el-row>
@@ -50,7 +50,7 @@
           children: 'children',
           label: 'label'
         },
-        departManager_btn_auth_save: false,
+        groupManager_btn_auth_save: false,
         groupId: -1
       }
     },
@@ -66,7 +66,7 @@
       }
       const elements = {}
       getElements(this.menus, elements);
-      this.departManager_btn_auth_save = elements['departManager:btn_auth_save'] | this.role == 'admin'
+      this.groupManager_btn_auth_save = elements['groupManager:btn_auth_save'] | this.role == 'admin'
     },
     watch: {
       filterText(val) {
@@ -90,6 +90,7 @@
           })
           this.$refs.menuTree.setCheckedKeys(selectedIds)
           this.listLoading = false;
+
         });
       },
       filterNode(value, data) {
