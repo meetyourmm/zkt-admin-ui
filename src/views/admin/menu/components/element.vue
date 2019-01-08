@@ -116,8 +116,8 @@
     data() {
       return {
         // methodOptions: ['GET', 'POST', 'PUT', 'DELETE'],
-        // typeOptions: ['uri', 'button'],
-        typeOptions: ['button'],
+        typeOptions: ['uri', 'button'],
+        // typeOptions: ['button'],
         form: {
           code: undefined,
           type: undefined,

@@ -8,7 +8,13 @@ export function fetchTree(query) {
     params: query
   })
 }
-
+export function getGroupAuth(groupId) {
+  return request({
+    url: '/api/menu/getGroupAuth',
+    method: 'post',
+    params: groupId
+  })
+}
 export function fetchAll() {
   return request({
     url: '/api/menu/all',
@@ -59,5 +65,12 @@ export function getElementList(query) {
     url: '/api/menu/getElementList',
     method: 'get',
     params: query
+  })
+}
+export function saveAuthTree(obj) {
+  return request({
+    url: '/api/menu/saveAuthTree',
+    method: 'post',
+    params: obj
   })
 }

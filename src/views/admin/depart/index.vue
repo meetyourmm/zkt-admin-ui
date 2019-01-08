@@ -71,9 +71,9 @@
         <el-tab-pane  label="用户管理" name="user">
             <group-user :groupId='currentId' ref="groupElement"></group-user>
         </el-tab-pane>
-        <!--<el-tab-pane  label="权限管理"  name="auth">-->
-           <!--<group-user :groupId='currentId' ref="groupElement"></group-user>-->
-        <!--</el-tab-pane>-->
+        <el-tab-pane  label="权限管理"  name="auth">
+           <group-auth :groupId='currentId' ref="authElement"></group-auth>
+        </el-tab-pane>
       </el-tabs>
 
     </el-card>
@@ -213,8 +213,14 @@ export default {
       });
       this.currentId = data.id;
       this.showElement = true;
-      this.$refs.groupElement.groupId = data.id;
-      this.$refs.groupElement.getList();
+      if(this.activeName=="user"){
+        this.$refs.groupElement.groupId = data.id;
+        this.$refs.groupElement.getList();
+      }else if(this.activeName=="auth"){
+        this.$refs.authElement.groupId = data.id;
+        this.$refs.authElement.getList();
+      }
+
     },
     handlerEdit() {
       if (this.form.id) {

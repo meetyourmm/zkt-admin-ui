@@ -8,7 +8,8 @@ const app = {
     },
     device: 'desktop',
     language: Cookies.get('language') || 'zh',
-    size: Cookies.get('size') || 'medium'
+    size: Cookies.get('size') || 'medium',
+    allMenus: undefined
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {
@@ -35,6 +36,9 @@ const app = {
     SET_SIZE: (state, size) => {
       state.size = size
       Cookies.set('size', size)
+    },
+    SET_ALL_MENUS: (state, menus) => {
+      state.allMenus = menus
     }
   },
   actions: {
@@ -52,6 +56,9 @@ const app = {
     },
     setSize({ commit }, size) {
       commit('SET_SIZE', size)
+    },
+    setAllMenus({ commit }, menus) {
+      commit('SET_ALL_MENUS', menus)
     }
   }
 }

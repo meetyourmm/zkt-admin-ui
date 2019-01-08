@@ -80,7 +80,8 @@
       }
     },
     created() {
-      this.getList();
+      // this.getList();
+      this.listLoading = false;
       const elements = {}
       getElements(this.menus, elements);
       this.departManager_btn_user_add = elements['departManager:btn_user_add'] | this.role == 'admin'
