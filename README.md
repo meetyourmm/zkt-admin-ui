@@ -1,4 +1,25 @@
-## 以下是vue-element-ui的介绍
+## 本项目介绍
+
+# 项目主要view
+```
+
+- views  
+  - admin
+    - apiLog 系统日志
+    - depart 组织架构
+    - dict 字典管理
+    - group 角色管理
+    - menu  系统菜单
+    - user 用户管理
+```
+---
+
+ <p align="center">
+  <img width="900" src="http://plgc58szh.bkt.clouddn.com/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20190117091920.png">
+</p>
+
+
+## 以下是vue-element-admin的介绍
 <p align="center">
   <img width="320" src="https://wpimg.wallstcn.com/ecc53a42-d79b-42e2-8852-5126b810a4c8.svg">
 </p>
@@ -178,6 +199,4 @@ npm run lint
 # auto fix
 npm run lint -- --fix
 ```
-
-## 本项目介绍
 
